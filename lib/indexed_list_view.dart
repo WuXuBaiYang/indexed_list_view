@@ -24,6 +24,7 @@ class IndexedListView extends StatefulWidget {
     this.physics,
     this.padding,
     this.itemExtent,
+    int? childrenCount,
     int? maxItemCount,
     int? minItemCount,
     bool addAutomaticKeepAlives = true,
@@ -37,10 +38,12 @@ class IndexedListView extends StatefulWidget {
                 (maxItemCount != null && _index > maxItemCount))
               return emptyItemBuilder(context, _index);
             else
-              return itemBuilder(context, _index) ?? emptyItemBuilder(context, _index);
+              return itemBuilder(context, _index) ??
+                  emptyItemBuilder(context, _index);
           },
           addAutomaticKeepAlives: addAutomaticKeepAlives,
           addRepaintBoundaries: addRepaintBoundaries,
+          childCount: childrenCount,
         ),
         negativeChildrenDelegate = SliverChildBuilderDelegate(
           (BuildContext context, int index) {
@@ -49,10 +52,12 @@ class IndexedListView extends StatefulWidget {
                 (maxItemCount != null && _index > maxItemCount))
               return emptyItemBuilder(context, _index);
             else
-              return itemBuilder(context, _index) ?? emptyItemBuilder(context, _index);
+              return itemBuilder(context, _index) ??
+                  emptyItemBuilder(context, _index);
           },
           addAutomaticKeepAlives: addAutomaticKeepAlives,
           addRepaintBoundaries: addRepaintBoundaries,
+          childCount: childrenCount,
         ),
         super(key: key);
 
@@ -82,7 +87,8 @@ class IndexedListView extends StatefulWidget {
               return emptyItemBuilder(context, _index);
             else
               return index.isEven
-                  ? (itemBuilder(context, _index) ?? emptyItemBuilder(context, _index))
+                  ? (itemBuilder(context, _index) ??
+                      emptyItemBuilder(context, _index))
                   : separatorBuilder(context, _index);
           },
           addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -96,7 +102,8 @@ class IndexedListView extends StatefulWidget {
               return emptyItemBuilder(context, _index);
             else
               return index.isOdd
-                  ? (itemBuilder(context, _index) ?? emptyItemBuilder(context, _index))
+                  ? (itemBuilder(context, _index) ??
+                      emptyItemBuilder(context, _index))
                   : separatorBuilder(context, _index);
           },
           addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -145,7 +152,8 @@ class IndexedListView extends StatefulWidget {
 /// The builder should create a widget for the given index.
 /// When the builder returns `null`, the list will ask the `emptyItemBuilder`
 /// to create an "empty" item to be displayed instead.
-typedef IndexedWidgetBuilderOrNull = Widget? Function(BuildContext context, int index);
+typedef IndexedWidgetBuilderOrNull = Widget? Function(
+    BuildContext context, int index);
 
 class _IndexedListViewState extends State<IndexedListView> {
   //
@@ -177,7 +185,8 @@ class _IndexedListViewState extends State<IndexedListView> {
     final List<Widget> slivers = _buildSlivers(context, negative: false);
     final List<Widget> negativeSlivers = _buildSlivers(context, negative: true);
     final AxisDirection axisDirection = _getDirection(context);
-    final scrollPhysics = widget.physics ?? const _AlwaysScrollableScrollPhysics();
+    final scrollPhysics =
+        widget.physics ?? const _AlwaysScrollableScrollPhysics();
     return Scrollable(
       // Rebuild everything when the originIndex changes.
       key: ValueKey(widget.controller._originIndex),
@@ -232,12 +241,16 @@ class _IndexedListViewState extends State<IndexedListView> {
     Widget sliver;
     if (widget.itemExtent != null) {
       sliver = SliverFixedExtentList(
-        delegate: negative ? widget.negativeChildrenDelegate : widget.positiveChildrenDelegate,
+        delegate: negative
+            ? widget.negativeChildrenDelegate
+            : widget.positiveChildrenDelegate,
         itemExtent: widget.itemExtent!,
       );
     } else {
       sliver = SliverList(
-          delegate: negative ? widget.negativeChildrenDelegate : widget.positiveChildrenDelegate);
+          delegate: negative
+              ? widget.negativeChildrenDelegate
+              : widget.positiveChildrenDelegate);
     }
     if (widget.padding != null) {
       sliver = SliverPadding(
@@ -253,23 +266,29 @@ class _IndexedListViewState extends State<IndexedListView> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     properties
-        .add(FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed', showName: true));
-    properties.add(DiagnosticsProperty<ScrollController>('controller', widget.controller,
+        .add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
+    properties.add(FlagProperty('reverse',
+        value: widget.reverse, ifTrue: 'reversed', showName: true));
+    properties.add(DiagnosticsProperty<ScrollController>(
+        'controller', widget.controller,
         showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics,
         showName: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
+        'padding', widget.padding,
+        defaultValue: null));
     properties.add(
-        DiagnosticsProperty<EdgeInsetsGeometry>('padding', widget.padding, defaultValue: null));
-    properties.add(DoubleProperty('itemExtent', widget.itemExtent, defaultValue: null));
-    properties.add(DoubleProperty('cacheExtent', widget.cacheExtent, defaultValue: null));
+        DoubleProperty('itemExtent', widget.itemExtent, defaultValue: null));
+    properties.add(
+        DoubleProperty('cacheExtent', widget.cacheExtent, defaultValue: null));
   }
 }
 
 class _AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
-  const _AlwaysScrollableScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const _AlwaysScrollableScrollPhysics({ScrollPhysics? parent})
+      : super(parent: parent);
 
   @override
   _AlwaysScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -299,7 +318,8 @@ class IndexedScrollController extends ScrollController {
   int get originIndex => _originIndex;
 
   @override
-  double get initialScrollOffset => _initialScrollOffset ?? super.initialScrollOffset;
+  double get initialScrollOffset =>
+      _initialScrollOffset ?? super.initialScrollOffset;
 
   double? _initialScrollOffset;
 
@@ -385,7 +405,8 @@ class IndexedScrollController extends ScrollController {
     Duration duration = const Duration(milliseconds: 750),
     Curve curve = Curves.decelerate,
   }) {
-    return animateToIndexAndOffset(index: index, offset: 0.0, duration: duration, curve: curve);
+    return animateToIndexAndOffset(
+        index: index, offset: 0.0, duration: duration, curve: curve);
   }
 
   /// Goes to origin-index 0,
@@ -471,12 +492,13 @@ class IndexedScrollController extends ScrollController {
     Duration duration = const Duration(milliseconds: 750),
     Curve curve = Curves.decelerate,
   }) {
-    return super.animateTo(this.offset + offset, duration: duration, curve: curve);
+    return super
+        .animateTo(this.offset + offset, duration: duration, curve: curve);
   }
 
   @override
-  ScrollPosition createScrollPosition(
-      ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics,
+      ScrollContext context, ScrollPosition? oldPosition) {
     return _IndexedScrollPosition(
       physics: physics,
       context: context,
